@@ -1,6 +1,3 @@
 package api
 
-import "github.com/parnurzeal/gorequest"
-
-gorequest.New()
-
+//import "github.com/parnurzeal/gorequest"

@@ -1,43 +1,34 @@
 package api
 
-type RequestType int
+type Params map[string]string
 
-var requestTypes []string
-
-func (e RequestType) String() string {
-	return requestTypes[int(e)]
+type API interface {
+	buildURL(rest []RESTResource, params Params) string
 }
 
-func riota(s string) RequestType {
-	requestTypes = append(requestTypes, s)
-	return RequestType(len(requestTypes) - 1)
+type RESTResource struct {
+	name  string
+	value string
 }
-
-var (
-	GET    = riota("GET")
-	POST   = riota("POST")
-	PUT    = riota("PUT")
-	DELETE = riota("DELETE")
-)
-
-type Vendor struct {
-	name string
-	url  string
-}
-
-var vendors []Vendor
-
-func addVendor(name string, url string) Vendor {
-	v := Vendor{name, url}
-	vendors = append(vendors, v)
-	return v
-}
-
-var (
-	Coinone = addVendor("Coinone", "https://www.coinone.co.kr")
-)
 
 type OutboundAPI struct {
-	vendor      Vendor
-	requestType RequestType
+	vendor Vendor
+}
+
+func (api OutboundAPI) buildURL(rest []RESTResource, params Params) string {
+	base := api.vendor.url
+	resource := ""
+	for _, r := range rest {
+		resource += r.name + "/"
+		if r.value != "" {
+			resource += r.value + "/"
+		}
+	}
+	resource = resource[:(len(resource) - 1)]
+	queryString := "?"
+	for k, v := range params {
+		queryString += k + "=" + v + "&"
+	}
+	queryString = queryString[:(len(queryString) - 1)]
+	return base + resource + queryString
 }
