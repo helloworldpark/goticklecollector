@@ -7,14 +7,14 @@ import (
 )
 
 func TestAPICall(t *testing.T) {
-	vendor := coinone
-	rest := restResource{"ticker", ""}
-	restList := []restResource{rest}
-	params := make(querys)
+	vendor := Coinone
+	rest := RestResource{"ticker", ""}
+	restList := []RestResource{rest}
+	params := make(Querys)
 	params["currency"] = "eos"
-	outbound := outboundAPI{vendor, restList, params}
+	outbound := OutboundAPI{vendor, restList, params}
 
-	status, contents := outbound.request()
+	status, contents := outbound.Request()
 
 	if status != 200 || contents["errorMsg"] != nil {
 		t.Errorf("Expected %d -> but got %d, %s", 200, status, contents["errorMsg"])
@@ -25,33 +25,33 @@ func TestAPICall(t *testing.T) {
 }
 
 func TestAPIResourceGOPAX(t *testing.T) {
-	gopaxReq := gopax.tickerAPI("eos")
+	gopaxReq := Gopax.TickerAPI("eos")
 
-	status, contents := gopaxReq.request()
+	status, contents := gopaxReq.Request()
 	if status != 200 || contents["errorMsg"] != nil {
 		t.Errorf("Failed GOPAX: %d, %s", status, contents["errorMsg"])
 	}
 }
 
 func TestAPIResourceCOINONE(t *testing.T) {
-	coinoneReq := coinone.tickerAPI("all")
+	coinoneReq := Coinone.TickerAPI("all")
 
-	status, contents := coinoneReq.request()
+	status, contents := coinoneReq.Request()
 	if status != 200 || contents["errorMsg"] != nil {
 		t.Errorf("Failed COINONE: %d, %s", status, contents["errorMsg"])
 	}
 }
 
 func TestBuildURL(t *testing.T) {
-	vendor := coinone
-	rest1 := restResource{"test1", ""}
-	rest2 := restResource{"test2", "myname"}
-	restList := []restResource{rest1, rest2}
-	params := make(querys)
+	vendor := Coinone
+	rest1 := RestResource{"test1", ""}
+	rest2 := RestResource{"test2", "myname"}
+	restList := []RestResource{rest1, rest2}
+	params := make(Querys)
 	params["abc"] = "123"
 	params["cde"] = "kkk"
 
-	outbound := outboundAPI{vendor, restList, params}
+	outbound := OutboundAPI{vendor, restList, params}
 	url := outbound.buildURL()
 
 	answer := "https://api.coinone.co.kr/test1/test2/myname?abc=123&cde=kkk"

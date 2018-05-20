@@ -12,14 +12,15 @@ var requesterMap map[string]*gorequest.SuperAgent
 
 func init() {
 	requesterMap = map[string]*gorequest.SuperAgent{}
-	requesterMap[coinone.name] = gorequest.New()
-	requesterMap[gopax.name] = gorequest.New()
+	requesterMap[Coinone.Name] = gorequest.New()
+	requesterMap[Gopax.Name] = gorequest.New()
 }
 
-func (api outboundAPI) request() (int, map[string]interface{}) {
-	requester := requesterMap[api.vendor.name]
+// Request makes a request to the vendor using the data from api.
+func (api OutboundAPI) Request() (int, map[string]interface{}) {
+	requester := requesterMap[api.vendor.Name]
 	if requester == nil {
-		panic(fmt.Sprintf("Not prepared for requesting to %s", api.vendor.name))
+		panic(fmt.Sprintf("Not prepared for requesting to %s", api.vendor.Name))
 	}
 
 	targetURL := api.buildURL()
@@ -40,7 +41,7 @@ func (api outboundAPI) request() (int, map[string]interface{}) {
 	return resp.StatusCode, contents
 }
 
-func (api outboundAPI) buildURL() string {
+func (api OutboundAPI) buildURL() string {
 	base := api.vendor.url
 	resource := ""
 	for _, r := range api.restList {
