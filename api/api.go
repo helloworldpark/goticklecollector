@@ -1,19 +1,19 @@
 package api
 
-type Params map[string]string
+type querys map[string]string
 
-type RESTResource struct {
+type restResource struct {
 	name  string
 	value string
 }
 
-type OutboundAPI struct {
-	vendor   Vendor
-	restList []RESTResource
-	params   Params
+type outboundAPI struct {
+	vendor   vendor
+	restList []restResource
+	params   querys
 }
 
-func (api OutboundAPI) buildURL() string {
+func (api outboundAPI) buildURL() string {
 	base := api.vendor.url
 	resource := ""
 	for _, r := range api.restList {

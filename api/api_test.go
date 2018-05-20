@@ -7,12 +7,12 @@ import (
 )
 
 func TestAPICall(t *testing.T) {
-	vendor := Coinone
-	rest := RESTResource{"ticker", ""}
-	restList := []RESTResource{rest}
-	params := make(Params)
+	vendor := coinone
+	rest := restResource{"ticker", ""}
+	restList := []restResource{rest}
+	params := make(querys)
 	params["currency"] = "eos"
-	outbound := OutboundAPI{vendor, restList, params}
+	outbound := outboundAPI{vendor, restList, params}
 
 	status, contents := outbound.request()
 
@@ -25,15 +25,15 @@ func TestAPICall(t *testing.T) {
 }
 
 func TestBuildURL(t *testing.T) {
-	vendor := Coinone
-	rest1 := RESTResource{"test1", ""}
-	rest2 := RESTResource{"test2", "myname"}
-	restList := []RESTResource{rest1, rest2}
-	params := make(Params)
+	vendor := coinone
+	rest1 := restResource{"test1", ""}
+	rest2 := restResource{"test2", "myname"}
+	restList := []restResource{rest1, rest2}
+	params := make(querys)
 	params["abc"] = "123"
 	params["cde"] = "kkk"
 
-	outbound := OutboundAPI{vendor, restList, params}
+	outbound := outboundAPI{vendor, restList, params}
 	url := outbound.buildURL()
 
 	answer := "https://api.coinone.co.kr/test1/test2/myname?abc=123&cde=kkk"

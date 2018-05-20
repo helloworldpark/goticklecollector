@@ -1,16 +1,16 @@
 package api
 
-type RequestType int
+type requestType int
 
 var requestTypes []string
 
-func (e RequestType) String() string {
+func (e requestType) String() string {
 	return requestTypes[int(e)]
 }
 
-func riota(s string) RequestType {
+func riota(s string) requestType {
 	requestTypes = append(requestTypes, s)
-	return RequestType(len(requestTypes) - 1)
+	return requestType(len(requestTypes) - 1)
 }
 
 var (

@@ -1,19 +1,19 @@
 package api
 
-type Vendor struct {
+type vendor struct {
 	name string
 	url  string
 }
 
-var vendors []Vendor
+var vendors []vendor
 
-func addVendor(name string, url string) Vendor {
-	v := Vendor{name, url}
+func addVendor(name string, url string) vendor {
+	v := vendor{name, url}
 	vendors = append(vendors, v)
 	return v
 }
 
 var (
-	Coinone = addVendor("Coinone", "https://api.coinone.co.kr/")
-	Gopax   = addVendor("Gopax", "https://api.gopax.co.kr/")
+	coinone = addVendor("Coinone", "https://api.coinone.co.kr/")
+	gopax   = addVendor("Gopax", "https://api.gopax.co.kr/")
 )
