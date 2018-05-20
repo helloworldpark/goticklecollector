@@ -1,5 +1,10 @@
 package api
 
+import (
+	"fmt"
+	"strings"
+)
+
 type querys map[string]string
 
 type restResource struct {
@@ -13,20 +18,23 @@ type outboundAPI struct {
 	params   querys
 }
 
-func (api outboundAPI) buildURL() string {
-	base := api.vendor.url
-	resource := ""
-	for _, r := range api.restList {
-		resource += r.name + "/"
-		if r.value != "" {
-			resource += r.value + "/"
-		}
+func (v vendor) tickerAPI(currency string) outboundAPI {
+	if v == coinone {
+		rest := restResource{name: "ticker", value: ""}
+		restList := []restResource{rest}
+		query := make(querys)
+		query["currency"] = currency
+		outbound := outboundAPI{vendor: v, restList: restList, params: query}
+		return outbound
 	}
-	resource = resource[:(len(resource) - 1)]
-	queryString := "?"
-	for k, v := range api.params {
-		queryString += k + "=" + v + "&"
+	if v == gopax {
+		tradingName := strings.ToUpper(currency) + "-KRW"
+		rest1 := restResource{name: "trading-pairs", value: tradingName}
+		rest2 := restResource{name: "ticker", value: ""}
+		restList := []restResource{rest1, rest2}
+		query := make(querys)
+		outbound := outboundAPI{vendor: v, restList: restList, params: query}
+		return outbound
 	}
-	queryString = queryString[:(len(queryString) - 1)]
-	return base + resource + queryString
+	panic(fmt.Sprintf("Not prepared for %s", v.name))
 }

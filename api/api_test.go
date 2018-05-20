@@ -24,6 +24,24 @@ func TestAPICall(t *testing.T) {
 	}
 }
 
+func TestAPIResourceGOPAX(t *testing.T) {
+	gopaxReq := gopax.tickerAPI("eos")
+
+	status, contents := gopaxReq.request()
+	if status != 200 || contents["errorMsg"] != nil {
+		t.Errorf("Failed GOPAX: %d, %s", status, contents["errorMsg"])
+	}
+}
+
+func TestAPIResourceCOINONE(t *testing.T) {
+	coinoneReq := coinone.tickerAPI("all")
+
+	status, contents := coinoneReq.request()
+	if status != 200 || contents["errorMsg"] != nil {
+		t.Errorf("Failed COINONE: %d, %s", status, contents["errorMsg"])
+	}
+}
+
 func TestBuildURL(t *testing.T) {
 	vendor := coinone
 	rest1 := restResource{"test1", ""}
