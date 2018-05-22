@@ -29,7 +29,6 @@ func (set StringSet) Remove(e string) {
 func ExtractTimestamp(obj map[string]interface{}, key string) (int64, bool) {
 	timestring, ok := obj[key].(string)
 	if !ok {
-		fmt.Println(fmt.Printf("%T %v", obj[key], obj[key]))
 		return 0, false
 	}
 	timestamp, err := time.Parse(time.RFC3339Nano, timestring)
@@ -37,7 +36,7 @@ func ExtractTimestamp(obj map[string]interface{}, key string) (int64, bool) {
 		fmt.Println(err)
 		return 0, false
 	}
-	return timestamp.UnixNano(), true
+	return timestamp.Unix(), true
 }
 
 // ExtractInt64 parses a value in the given map to uint64.
