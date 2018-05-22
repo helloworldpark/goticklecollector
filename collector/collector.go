@@ -7,8 +7,10 @@ import (
 
 // Collector is an interface a collector should do.
 // Collect() collects and wraps in a Coin slice.
+// Count() is a number how many types of Coin will be in Collect()
 type Collector interface {
 	Collect() []Coin
+	Count() int
 }
 
 // CoinoneCollector collects coin data from Coinone.
@@ -60,6 +62,12 @@ func (collector CoinoneCollector) Collect() []Coin {
 	return coins
 }
 
+// Count returns how many types of Coin collector will collect
+// In case of CoinoneCollector, 11
+func (collector CoinoneCollector) Count() int {
+	return 11
+}
+
 // Collect collects coin data from Gopax.
 // Returns coin data collected by ticker, by specified currency of the collector.
 func (collector GopaxCollector) Collect() []Coin {
@@ -77,4 +85,10 @@ func (collector GopaxCollector) Collect() []Coin {
 	}
 
 	return coins
+}
+
+// Count returns how many types of Coin collector will collect
+// In case of GopaxCollector, 1
+func (collector GopaxCollector) Count() int {
+	return 1
 }

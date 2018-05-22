@@ -3,7 +3,6 @@ package collector
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	"github.com/helloworldpark/goticklecollector/api"
 	"github.com/helloworldpark/goticklecollector/utils"
@@ -67,7 +66,6 @@ func jsonToCoinoneTicker(s string) ([]coinConvertable, error) {
 	}
 	models := make([]coinConvertable, 0, len(bucket))
 	for _, v := range bucket {
-		fmt.Println(fmt.Sprintf("Type = %v", v))
 		m, ok := v.(map[string]interface{})
 		if !ok {
 			continue

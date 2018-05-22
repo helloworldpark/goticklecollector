@@ -14,10 +14,10 @@ func TestAPICall(t *testing.T) {
 	params["currency"] = "eos"
 	outbound := OutboundAPI{vendor, restList, params}
 
-	status, contents := outbound.Request()
+	status, contents, errs := outbound.Request()
 
-	if status != 200 || contents["errorMsg"] != nil {
-		t.Errorf("Expected %d -> but got %d, %s", 200, status, contents["errorMsg"])
+	if status != 200 || len(errs) != 0 {
+		t.Errorf("Expected %d -> but got %d, %s", 200, status, errs[0].Error())
 	} else {
 		spewed := spew.Sdump(contents)
 		t.Errorf("Success!\n %s", spewed)
@@ -27,18 +27,18 @@ func TestAPICall(t *testing.T) {
 func TestAPIResourceGOPAX(t *testing.T) {
 	gopaxReq := Gopax.TickerAPI("eos")
 
-	status, contents := gopaxReq.Request()
-	if status != 200 || contents["errorMsg"] != nil {
-		t.Errorf("Failed GOPAX: %d, %s", status, contents["errorMsg"])
+	status, _, errs := gopaxReq.Request()
+	if status != 200 || len(errs) != 0 {
+		t.Errorf("Failed GOPAX: %d, %s", status, errs[0].Error())
 	}
 }
 
 func TestAPIResourceCOINONE(t *testing.T) {
 	coinoneReq := Coinone.TickerAPI("all")
 
-	status, contents := coinoneReq.Request()
-	if status != 200 || contents["errorMsg"] != nil {
-		t.Errorf("Failed COINONE: %d, %s", status, contents["errorMsg"])
+	status, _, errs := coinoneReq.Request()
+	if status != 200 || len(errs) != 0 {
+		t.Errorf("Failed COINONE: %d, %s", status, errs[0].Error())
 	}
 }
 
