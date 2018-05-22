@@ -4,9 +4,18 @@ import (
 	"fmt"
 
 	"github.com/parnurzeal/gorequest"
-
-	"encoding/json"
 )
+
+// OutboundAPI is a struct wrapper for outbount API call.
+// Note that only GET is supported.
+// vendor: Vendor of the cryptocurrency trading service.
+// restList: []RestResource for constructing REST API.
+// params: Querys for constructing query string.
+type OutboundAPI struct {
+	vendor   Vendor
+	restList []RestResource
+	params   Querys
+}
 
 var requesterMap map[string]*gorequest.SuperAgent
 
@@ -17,7 +26,8 @@ func init() {
 }
 
 // Request makes a request to the vendor using the data from api.
-func (api OutboundAPI) Request() (int, map[string]interface{}) {
+// Returns: response code int, body string, slice of error errs
+func (api OutboundAPI) Request() (int, string, []error) {
 	requester := requesterMap[api.vendor.Name]
 	if requester == nil {
 		panic(fmt.Sprintf("Not prepared for requesting to %s", api.vendor.Name))
@@ -25,20 +35,7 @@ func (api OutboundAPI) Request() (int, map[string]interface{}) {
 
 	targetURL := api.buildURL()
 	resp, body, errs := requester.Get(targetURL).End()
-	contents := make(map[string]interface{})
-	if len(errs) == 0 {
-		err := json.Unmarshal([]byte(body), &contents)
-		if err != nil {
-			contents["errorMsg"] = err.Error()
-		}
-	} else {
-		errMsg := ""
-		for _, err := range errs {
-			errMsg += err.Error() + "\n"
-		}
-		contents["errorMsg"] = errMsg
-	}
-	return resp.StatusCode, contents
+	return resp.StatusCode, body, errs
 }
 
 func (api OutboundAPI) buildURL() string {

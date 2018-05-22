@@ -39,17 +39,6 @@ type RestResource struct {
 	value string
 }
 
-// OutboundAPI is a struct wrapper for outbount API call.
-// Note that only GET is supported.
-// vendor: Vendor of the cryptocurrency trading service.
-// restList: []RestResource for constructing REST API.
-// params: Querys for constructing query string.
-type OutboundAPI struct {
-	vendor   Vendor
-	restList []RestResource
-	params   Querys
-}
-
 // TickerAPI constructs an OutboundAPI struct for calling /ticker for each vendor.
 // currency: string representing type of currency whose data we collect.
 func (v Vendor) TickerAPI(currency string) OutboundAPI {

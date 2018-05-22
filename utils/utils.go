@@ -25,6 +25,15 @@ func (set StringSet) Remove(e string) {
 	delete(set, e)
 }
 
+// Converts string-formatted timestamp to UNIX Int64
+func TimestampAsInt64(t string) (int64, error) {
+	timestamp, err := time.Parse(time.RFC3339Nano, t)
+	if err != nil {
+		return 0, err
+	}
+	return timestamp.Unix(), err
+}
+
 // ExtractTimestamp parses ISO8601 or RFC3339Nano formatted time string to int64 UNIX timestamp.
 func ExtractTimestamp(obj map[string]interface{}, key string) (int64, bool) {
 	timestring, ok := obj[key].(string)
