@@ -61,7 +61,7 @@ func Gather(pipes []CoinGateway) ([]CoinGateway, CoinGateway) {
 // GiveWork gives work to collector.Collector. It runs a goroutine and returns channels per coin type
 // Params:
 //    c collector.Collector: Type of coin to collect.
-//    period time.Duration: Time to sleep in seconds.
+//    period time.Duration: Time to sleep in nanoseconds.
 // Returns:
 //    []CoinGateway: CoinGateway per coin type
 func GiveWork(c collector.Collector, period time.Duration) []CoinGateway {
