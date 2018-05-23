@@ -4,27 +4,36 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/helloworldpark/goticklecollector/api"
+
 	"github.com/helloworldpark/goticklecollector/collector"
+	"github.com/helloworldpark/goticklecollector/holder"
 )
 
 func main() {
-	coinoneGW := collector.GiveWork(collector.CoinoneCollector{}, 3*time.Second)
-	dfBundle, dbBundle := collector.Gather(coinoneGW)
-
 	fmt.Println("Main!")
 
-	for _, b := range dfBundle {
-		go func(bundle collector.CoinGateway) {
-			for coin := range bundle.Channel() {
-				fmt.Println(fmt.Sprintf("DF %v", coin))
-			}
-		}(b)
+	coll := collector.CoinoneCollector{}
+
+	holders := make([]holder.Holder, 0)
+
+	for _, currency := range coll.Currencies() {
+		h := holder.New(api.Coinone.Name, currency, 3)
+		holders = append(holders, h)
+	}
+
+	coinoneGW := collector.GiveWork(coll, 3*time.Second)
+	dfBundle, dbBundle := collector.Gather(coinoneGW)
+
+	for i, bundle := range dfBundle {
+		go func(idx int, g collector.CoinGateway) {
+			holders[idx].StartUpdate(g)
+		}(i, bundle)
 	}
 
 	func(bundle collector.CoinGateway) {
 		for coin := range bundle.Channel() {
-			fmt.Println(fmt.Sprintf("DB %v", coin))
+			_ = coin.Timestamp
 		}
 	}(dbBundle)
-
 }

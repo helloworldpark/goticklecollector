@@ -83,3 +83,16 @@ func ExtractFloat32(obj map[string]interface{}, key string) (float32, bool) {
 	}
 	return num, true
 }
+
+// Sequence generates a sequence of equal interval
+func Sequence(start int, includedEnd int, interval int) []int {
+	if interval <= 0 {
+		panic("Cannot generate sequence with interval smaller or equal to zero")
+	}
+	n := 1 + ((includedEnd - start) / interval)
+	seq := make([]int, n)
+	for i := 0; i < n; i++ {
+		seq[i] = start + (i-1)*interval
+	}
+	return seq
+}

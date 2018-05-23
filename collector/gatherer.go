@@ -7,7 +7,7 @@ import (
 )
 
 // CoinGateway is a wrapper of Coin channel
-// It provides only a property to <-chan ]Coin
+// It provides only a property to <-chan Coin
 type CoinGateway struct {
 	gateway chan Coin
 }

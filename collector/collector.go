@@ -11,6 +11,7 @@ import (
 type Collector interface {
 	Collect() []Coin
 	Count() int
+	Currencies() []string
 }
 
 // CoinoneCollector collects coin data from Coinone.
@@ -68,6 +69,10 @@ func (collector CoinoneCollector) Count() int {
 	return 11
 }
 
+func (collector CoinoneCollector) Currencies() []string {
+	return []string{"btc", "bch", "eth", "etc", "xrp", "qtum", "iota", "ltc", "btg", "omg", "eos"}
+}
+
 // Collect collects coin data from Gopax.
 // Returns coin data collected by ticker, by specified currency of the collector.
 func (collector GopaxCollector) Collect() []Coin {
@@ -91,4 +96,8 @@ func (collector GopaxCollector) Collect() []Coin {
 // In case of GopaxCollector, 1
 func (collector GopaxCollector) Count() int {
 	return 1
+}
+
+func (collector GopaxCollector) Currencies() []string {
+	return []string{collector.currency}
 }
