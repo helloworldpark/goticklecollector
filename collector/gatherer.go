@@ -1,21 +1,19 @@
-package gatherer
+package collector
 
 import (
 	"fmt"
 	"sync"
 	"time"
-
-	"github.com/helloworldpark/goticklecollector/collector"
 )
 
-// CoinGateway is a wrapper of collector.Coin channel
-// It provides only a property to <-chan collector.Coin
+// CoinGateway is a wrapper of Coin channel
+// It provides only a property to <-chan ]Coin
 type CoinGateway struct {
-	gateway chan collector.Coin
+	gateway chan Coin
 }
 
-// Channel is a property to <-chan collector.Coin
-func (cg CoinGateway) Channel() <-chan collector.Coin {
+// Channel is a property to <-chan Coin
+func (cg CoinGateway) Channel() <-chan Coin {
 	return cg.gateway
 }
 
@@ -27,11 +25,11 @@ func Gather(pipes []CoinGateway) ([]CoinGateway, CoinGateway) {
 	dfBundle := make([]CoinGateway, len(pipes))
 	for i := 0; i < len(pipes); i++ {
 		bundle := CoinGateway{}
-		bundle.gateway = make(chan collector.Coin)
+		bundle.gateway = make(chan Coin)
 		dfBundle[i] = bundle
 	}
 	dbBundle := CoinGateway{}
-	dbBundle.gateway = make(chan collector.Coin)
+	dbBundle.gateway = make(chan Coin)
 
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(len(pipes))
@@ -58,17 +56,17 @@ func Gather(pipes []CoinGateway) ([]CoinGateway, CoinGateway) {
 	return dfBundle, dbBundle
 }
 
-// GiveWork gives work to collector.Collector. It runs a goroutine and returns channels per coin type
+// GiveWork gives work to Collector. It runs a goroutine and returns channels per coin type
 // Params:
-//    c collector.Collector: Type of coin to collect.
+//    c Collector: Type of coin to collect.
 //    period time.Duration: Time to sleep in nanoseconds.
 // Returns:
 //    []CoinGateway: CoinGateway per coin type
-func GiveWork(c collector.Collector, period time.Duration) []CoinGateway {
+func GiveWork(c Collector, period time.Duration) []CoinGateway {
 	gateways := make([]CoinGateway, c.Count())
 	for i := 0; i < len(gateways); i++ {
 		gateway := CoinGateway{}
-		gateway.gateway = make(chan collector.Coin)
+		gateway.gateway = make(chan Coin)
 		gateways[i] = gateway
 	}
 

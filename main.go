@@ -5,24 +5,23 @@ import (
 	"time"
 
 	"github.com/helloworldpark/goticklecollector/collector"
-	"github.com/helloworldpark/goticklecollector/gatherer"
 )
 
 func main() {
-	coinoneGW := gatherer.GiveWork(collector.CoinoneCollector{}, 3*time.Second)
-	dfBundle, dbBundle := gatherer.Gather(coinoneGW)
+	coinoneGW := collector.GiveWork(collector.CoinoneCollector{}, 3*time.Second)
+	dfBundle, dbBundle := collector.Gather(coinoneGW)
 
 	fmt.Println("Main!")
 
 	for _, b := range dfBundle {
-		go func(bundle gatherer.CoinGateway) {
+		go func(bundle collector.CoinGateway) {
 			for coin := range bundle.Channel() {
 				fmt.Println(fmt.Sprintf("DF %v", coin))
 			}
 		}(b)
 	}
 
-	func(bundle gatherer.CoinGateway) {
+	func(bundle collector.CoinGateway) {
 		for coin := range bundle.Channel() {
 			fmt.Println(fmt.Sprintf("DB %v", coin))
 		}
