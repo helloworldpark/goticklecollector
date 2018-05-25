@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/helloworldpark/goticklecollector/api"
@@ -21,6 +23,9 @@ func main() {
 		h := holder.New(api.Coinone.Name, currency, 3)
 		holders = append(holders, h)
 	}
+	sort.Slice(holders, func(i, j int) bool {
+		return strings.Compare(holders[i].Currency, holders[j].Currency) <= 0
+	})
 
 	coinoneGW := collector.GiveWork(coll, 3*time.Second)
 	dfBundle, dbBundle := collector.Gather(coinoneGW)

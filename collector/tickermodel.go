@@ -14,19 +14,19 @@ type Coin struct {
 	Currency  string
 	Timestamp int64
 	Price     int
-	Qty       float32
+	Qty       float64
 }
 
 type tickerModelCoinone struct {
 	Price     int
-	Qty       float32
+	Qty       float64
 	Timestamp int64
 	Currency  string
 }
 
 type tickerModelGopax struct {
 	Price     int     `json:"price"`
-	Qty       float32 `json:"volume"`
+	Qty       float64 `json:"volume"`
 	Timestamp string  `json:"time"`
 	Currency  string  `json:"-"`
 }
@@ -83,7 +83,7 @@ func jsonToCoinoneTicker(s string) ([]coinConvertable, error) {
 func mapToCoinoneTicker(m map[string]interface{}) (tickerModelCoinone, error) {
 	model := tickerModelCoinone{}
 	model.Price, _ = utils.ExtractInt32(m, "last")
-	model.Qty, _ = utils.ExtractFloat32(m, "volume")
+	model.Qty, _ = utils.ExtractFloat64(m, "volume")
 	model.Currency, _ = m["currency"].(string)
 	return model, nil
 }

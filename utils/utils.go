@@ -84,6 +84,23 @@ func ExtractFloat32(obj map[string]interface{}, key string) (float32, bool) {
 	return num, true
 }
 
+// ExtractFloat64 parses a value in the given map to float32.
+func ExtractFloat64(obj map[string]interface{}, key string) (float64, bool) {
+	num, ok := obj[key].(float64)
+	if !ok {
+		nstring, ok := obj[key].(string)
+		if !ok {
+			return 0, false
+		}
+		n, err := strconv.ParseFloat(nstring, 64)
+		if err != nil {
+			return 0, false
+		}
+		num = n
+	}
+	return num, true
+}
+
 // Sequence generates a sequence of equal interval
 func Sequence(start int, includedEnd int, interval int) []int {
 	if interval <= 0 {
