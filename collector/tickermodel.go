@@ -10,11 +10,11 @@ import (
 
 // Coin defines what to collect and save.
 type Coin struct {
-	Vendor    string
-	Currency  string
-	Timestamp int64
-	Price     int
-	Qty       float64
+	Vendor    string  `json:"vendor"`
+	Currency  string  `json:"currency"`
+	Timestamp int64   `json:"timestamp"`
+	Price     int     `json:"price"`
+	Qty       float64 `json:"qty"`
 }
 
 type tickerModelCoinone struct {

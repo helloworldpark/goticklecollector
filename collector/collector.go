@@ -69,6 +69,7 @@ func (collector CoinoneCollector) Count() int {
 	return 11
 }
 
+// Currencies returns the currency the collector is now collecting
 func (collector CoinoneCollector) Currencies() []string {
 	return []string{"btc", "bch", "eth", "etc", "xrp", "qtum", "iota", "ltc", "btg", "omg", "eos"}
 }
@@ -98,6 +99,7 @@ func (collector GopaxCollector) Count() int {
 	return 1
 }
 
+// Currencies returns the currency the collector is now collecting
 func (collector GopaxCollector) Currencies() []string {
 	return []string{collector.currency}
 }

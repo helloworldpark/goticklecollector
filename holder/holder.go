@@ -1,6 +1,7 @@
 package holder
 
 import (
+	"log"
 	"time"
 
 	"github.com/helloworldpark/goticklecollector/collector"
@@ -26,7 +27,7 @@ type Provider interface {
 type Holder struct {
 	Vendor               string
 	Currency             string
-	records              []collector.Coin
+	records              *[]collector.Coin
 	capacity             int
 	lastBaseTime         int64
 	lastCumulativeVolume float64
@@ -40,7 +41,8 @@ func New(vendor, currency string, capacity int) Holder {
 	h.Vendor = vendor
 	h.Currency = currency
 	h.capacity = capacity
-	h.records = make([]collector.Coin, 0, capacity)
+	records := make([]collector.Coin, 0, capacity)
+	h.records = &records
 	h.isFirst = true
 
 	return h
@@ -59,11 +61,11 @@ func (h Holder) StartUpdate(gateway collector.CoinGateway) {
 //    to: int64, UNIX timestamp, should be bigger than from
 func (h Holder) CanProvide(from, to int64) bool {
 	records := h.records
-	if len(records) == 0 {
+	if len(*records) == 0 {
 		return false
 	}
-	headInbounds := from >= records[0].Timestamp
-	tailInbounds := to <= records[len(records)-1].Timestamp
+	headInbounds := from >= (*records)[0].Timestamp
+	tailInbounds := to <= (*records)[len(*records)-1].Timestamp
 	return headInbounds && tailInbounds
 }
 
@@ -72,11 +74,11 @@ func (h Holder) CanProvide(from, to int64) bool {
 //    seconds: int64, UNIX timestamp, in seconds.
 func (h Holder) CanProvideLast(seconds int64) bool {
 	records := h.records
-	if len(records) == 0 {
+	if len(*records) == 0 {
 		return false
 	}
-	headTime := records[0].Timestamp
-	tailTime := records[len(records)-1].Timestamp
+	headTime := (*records)[0].Timestamp
+	tailTime := (*records)[len(*records)-1].Timestamp
 	headInbounds := tailTime-seconds >= headTime
 	return headInbounds
 }
@@ -91,7 +93,7 @@ func (h Holder) Provide(from, to int64) []collector.Coin {
 		return from <= x && x <= to
 	}
 	result := make([]collector.Coin, 0)
-	for _, coin := range records {
+	for _, coin := range *records {
 		if isIn(coin.Timestamp) {
 			result = append(result, coin)
 		}
@@ -102,13 +104,17 @@ func (h Holder) Provide(from, to int64) []collector.Coin {
 // ProvideLast provides data as much as it can in the query interval.
 // Params:
 //    seconds: int64, UNIX timestamp, in seconds.
-func (h Holder) ProvideLast(seconds int64) []collector.Coin {
+func (h *Holder) ProvideLast(seconds int64) []collector.Coin {
 	records := h.records
-	lastTimestamp := records[len(records)-1].Timestamp
+	log.Printf("[%s] Provide: %d data", h.Currency, len(*records))
+	if len(*records) == 0 {
+		return *records
+	}
+	lastTimestamp := (*records)[len(*records)-1].Timestamp
 	result := make([]collector.Coin, 0)
-	for i := len(records) - 1; i >= 0; i-- {
-		coin := records[i]
-		if coin.Timestamp > lastTimestamp-seconds {
+	for i := len(*records) - 1; i >= 0; i-- {
+		coin := (*records)[i]
+		if coin.Timestamp < lastTimestamp-seconds {
 			break
 		}
 		result = append(result, coin)
@@ -138,8 +144,8 @@ func (h *Holder) update(coin collector.Coin) {
 	if h.isFirst {
 		h.isFirst = false
 	} else {
-		for len(h.records) >= h.capacity {
-			h.records = h.records[1:]
+		for len(*(h.records)) >= h.capacity {
+			*(h.records) = (*(h.records))[1:]
 		}
 		newCoin := coin
 		if baseTimeChanged {
@@ -148,6 +154,6 @@ func (h *Holder) update(coin collector.Coin) {
 			newCoin.Qty = coin.Qty - h.lastCumulativeVolume
 		}
 		h.lastCumulativeVolume = coin.Qty
-		h.records = append(h.records, newCoin)
+		*(h.records) = append(*(h.records), newCoin)
 	}
 }

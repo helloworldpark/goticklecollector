@@ -85,7 +85,6 @@ func GiveWork(c Collector, period time.Duration) []CoinGateway {
 			sort.Slice(coins, func(i, j int) bool {
 				return strings.Compare(coins[i].Currency, coins[j].Currency) <= 0
 			})
-			fmt.Println(fmt.Sprintf("Collected(#1): %d", len(coins)))
 			for idx, coin := range coins {
 				gateways[idx].gateway <- coin
 			}
