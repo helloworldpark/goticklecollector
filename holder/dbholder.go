@@ -85,6 +85,7 @@ func (h *DBHolder) Init() {
 	if err != nil {
 		panic(err)
 	}
+	log.Println("[DBHolder] DB Connection Finished")
 	h.db = db
 }
 
@@ -134,6 +135,8 @@ func (h DBHolder) flush() {
 	}
 	// vendor, currency, price, qty, timestamp
 	qstring := fmt.Sprintf("INSERT INTO %s VALUES (?, ?, ?, ?, ?)", h.tableName)
+
+	log.Printf("Flush? %s", qstring)
 	buffer := h.buffers[h.bufferIndex]
 	for _, coin := range *buffer {
 		_, err := tx.Exec(qstring, coin.Vendor, coin.Currency, coin.Price, coin.Qty, coin.Timestamp)
