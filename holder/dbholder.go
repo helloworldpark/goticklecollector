@@ -79,7 +79,6 @@ func (h *DBHolder) Init() {
 
 	db, err := sql.Open("mysql", openingQuery(h.credential))
 	if err != nil {
-		db.Close()
 		panic(err)
 	}
 	h.db = db
