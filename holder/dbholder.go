@@ -1,6 +1,7 @@
 package holder
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -8,7 +9,6 @@ import (
 	"log"
 	"sync"
 
-	"github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/mysql"
 	"github.com/helloworldpark/goticklecollector/collector"
 )
 
@@ -73,19 +73,29 @@ func (h *DBHolder) Init() {
 		return
 	}
 	h.isInitialized = true
-	config := mysql.Cfg(
-		h.credential.instanceConnectionName,
-		h.credential.databaseUser,
-		h.credential.password)
-	config.DBName = h.credential.dbName
 
 	h.dbName = h.credential.dbName
 	h.tableName = h.credential.tableName
-	db, err := mysql.DialCfg(config)
+
+	db, err := sql.Open("mysql", openingQuery(h.credential))
 	if err != nil {
+		db.Close()
 		panic(err)
 	}
 	h.db = db
+}
+
+func openingQuery(credential DBCredential) string {
+	var buf bytes.Buffer
+	buf.WriteString(credential.databaseUser)
+	buf.WriteByte(':')
+	buf.WriteString(credential.password)
+	buf.WriteByte('@')
+	buf.WriteByte('/')
+	buf.WriteString(credential.instanceConnectionName)
+	buf.WriteByte('/')
+	buf.WriteString(credential.dbName)
+	return buf.String()
 }
 
 // ConnectDBChannel connects input to DB writing buffer.
