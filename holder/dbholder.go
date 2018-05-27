@@ -124,7 +124,7 @@ func (h *DBHolder) switchBuffer() {
 func (h DBHolder) flush() {
 	tx, err := h.db.Begin()
 	if err != nil {
-		tx.Rollback()
+		log.Fatal(err)
 		return
 	}
 	// vendor, currency, price, qty, timestamp
