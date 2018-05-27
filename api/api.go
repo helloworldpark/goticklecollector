@@ -60,6 +60,29 @@ func init() {
 	requesterMap[Gopax.Name] = gorequest.New()
 }
 
+func (v Vendor) TradesAPI(currency string) OutboundAPI {
+	if v == Coinone {
+		rest := RestResource{name: "trades", value: ""}
+		restList := []RestResource{rest}
+		query := make(Querys)
+		query["currency"] = currency
+		query["period"] = "hour"
+		outbound := OutboundAPI{vendor: v, restList: restList, params: query}
+		return outbound
+	}
+	if v == Gopax {
+		tradingName := strings.ToUpper(currency) + "-KRW"
+		rest1 := RestResource{name: "trading-pairs", value: tradingName}
+		rest2 := RestResource{name: "trades", value: ""}
+		restList := []RestResource{rest1, rest2}
+		query := make(Querys)
+		query["limit"] = "100"
+		outbound := OutboundAPI{vendor: v, restList: restList, params: query}
+		return outbound
+	}
+	panic(fmt.Sprintf("Not prepared for %s", v.Name))
+}
+
 // TickerAPI constructs an OutboundAPI struct for calling /ticker for each vendor.
 // currency: string representing type of currency whose data we collect.
 func (v Vendor) TickerAPI(currency string) OutboundAPI {
@@ -93,6 +116,9 @@ func (api OutboundAPI) Request() (int, string, []error) {
 
 	targetURL := api.buildURL()
 	resp, body, errs := requester.Get(targetURL).End()
+	if resp == nil {
+		return 400, body, errs
+	}
 	return resp.StatusCode, body, errs
 }
 

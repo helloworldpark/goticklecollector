@@ -2,10 +2,8 @@ package collector
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/helloworldpark/goticklecollector/api"
-	"github.com/helloworldpark/goticklecollector/utils"
 )
 
 // Coin defines what to collect and save.
@@ -17,32 +15,37 @@ type Coin struct {
 	Qty       float64 `json:"qty"`
 }
 
-type tickerModelCoinone struct {
-	Price     int
-	Qty       float64
-	Timestamp int64
-	Currency  string
+type tradesModelCoinone struct {
+	Result         string              `json:"result"`
+	ErrorCode      string              `json:"errorCode"`
+	Timestamp      int64               `json:"timestamp,string"`
+	CompleteOrders []tradeModelCoinone `json:"completeOrders"`
 }
 
-type tickerModelGopax struct {
+type tradeModelCoinone struct {
+	Price     int     `json:"price,string"`
+	Qty       float64 `json:"qty,string"`
+	Timestamp int64   `json:"timestamp,string"`
+}
+
+type tradesModelGopax struct {
 	Price     int     `json:"price"`
-	Qty       float64 `json:"volume"`
-	Timestamp string  `json:"time"`
-	Currency  string  `json:"-"`
+	Qty       float64 `json:"qty"`
+	Timestamp int64   `json:"date"`
 }
 
 type coinConvertable interface {
 	convert() Coin
 }
 
-// JSONToCoin converts JSON string to slice of Coin depending on the vendor
-func JSONToCoin(vendor api.Vendor, s string) []Coin {
+// JSONToCoinTrades converts JSON string to slice of Coin depending on the vendor
+func JSONToCoinTrades(vendor api.Vendor, jsonString string) []Coin {
 	var convertables []coinConvertable
 	var err error
 	if vendor == api.Coinone {
-		convertables, err = jsonToCoinoneTicker(s)
+		convertables, err = jsonToCoinoneTrades(jsonString)
 	} else if vendor == api.Gopax {
-		convertables, err = jsonToGopaxTicker(s)
+		convertables, err = jsonToGopaxTrades(jsonString)
 	}
 	if err != nil {
 		panic(err)
@@ -54,69 +57,45 @@ func JSONToCoin(vendor api.Vendor, s string) []Coin {
 	return coins
 }
 
-func jsonToCoinoneTicker(s string) ([]coinConvertable, error) {
-	bucket := make(map[string]interface{})
-	if err := json.Unmarshal([]byte(s), &bucket); err != nil {
+func jsonToCoinoneTrades(jsonString string) ([]coinConvertable, error) {
+	trades := tradesModelCoinone{}
+	if err := json.Unmarshal([]byte(jsonString), &trades); err != nil {
 		return make([]coinConvertable, 0), err
 	}
 
-	timestamp, ok := utils.ExtractInt64(bucket, "timestamp")
-	if !ok {
-		return make([]coinConvertable, 0), errors.New("Timestamp not existing in the response")
+	convertables := make([]coinConvertable, 0, len(trades.CompleteOrders))
+	for _, trade := range trades.CompleteOrders {
+		convertables = append(convertables, trade)
 	}
-	models := make([]coinConvertable, 0, len(bucket))
-	for _, v := range bucket {
-		m, ok := v.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		model, err := mapToCoinoneTicker(m)
-		if err != nil {
-			return make([]coinConvertable, 0), err
-		}
-		model.Timestamp = timestamp
-		models = append(models, model)
-	}
-	return models, nil
+	return convertables, nil
 }
 
-func mapToCoinoneTicker(m map[string]interface{}) (tickerModelCoinone, error) {
-	model := tickerModelCoinone{}
-	model.Price, _ = utils.ExtractInt32(m, "last")
-	model.Qty, _ = utils.ExtractFloat64(m, "volume")
-	model.Currency, _ = m["currency"].(string)
-	return model, nil
-}
-
-func jsonToGopaxTicker(s string) ([]coinConvertable, error) {
-	model := tickerModelGopax{}
-	if err := json.Unmarshal([]byte(s), &model); err != nil {
+func jsonToGopaxTrades(jsonString string) ([]coinConvertable, error) {
+	trades := make([]tradesModelGopax, 0)
+	if err := json.Unmarshal([]byte(jsonString), &trades); err != nil {
 		return make([]coinConvertable, 0), err
 	}
-	return []coinConvertable{model}, nil
+	convertables := make([]coinConvertable, 0, len(trades))
+	for _, trade := range trades {
+		convertables = append(convertables, trade)
+	}
+	return convertables, nil
 }
 
-func (model tickerModelCoinone) convert() Coin {
+func (m tradeModelCoinone) convert() Coin {
 	coin := Coin{}
+	coin.Price = m.Price
+	coin.Qty = m.Qty
+	coin.Timestamp = m.Timestamp
 	coin.Vendor = api.Coinone.Name
-	coin.Currency = model.Currency
-	coin.Price = model.Price
-	coin.Qty = model.Qty
-	coin.Timestamp = model.Timestamp
-
 	return coin
 }
 
-func (model tickerModelGopax) convert() Coin {
+func (m tradesModelGopax) convert() Coin {
 	coin := Coin{}
+	coin.Price = m.Price
+	coin.Qty = m.Qty
+	coin.Timestamp = m.Timestamp
 	coin.Vendor = api.Gopax.Name
-	coin.Currency = model.Currency
-	coin.Price = model.Price
-	coin.Qty = model.Qty
-	timestamp, err := utils.TimestampAsInt64(model.Timestamp)
-	if err != nil {
-		panic(err)
-	}
-	coin.Timestamp = timestamp
 	return coin
 }

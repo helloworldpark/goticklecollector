@@ -2,7 +2,6 @@ package holder
 
 import (
 	"log"
-	"time"
 
 	"github.com/helloworldpark/goticklecollector/collector"
 )
@@ -25,13 +24,12 @@ type Provider interface {
 
 // Holder is a struct to manage accumulation and tracking of coin data.
 type Holder struct {
-	Vendor               string
-	Currency             string
-	records              *[]collector.Coin
-	capacity             int
-	lastBaseTime         int64
-	lastCumulativeVolume float64
-	isFirst              bool
+	Vendor         string
+	Currency       string
+	records        *[]collector.Coin
+	capacity       int
+	lastTradeTime  int64
+	lastTradeCount int
 }
 
 // New is a constructor of Holder
@@ -43,15 +41,14 @@ func New(vendor, currency string, capacity int) Holder {
 	h.capacity = capacity
 	records := make([]collector.Coin, 0, capacity)
 	h.records = &records
-	h.isFirst = true
 
 	return h
 }
 
 // StartUpdate starts to update coin information
 func (h Holder) StartUpdate(gateway collector.CoinGateway) {
-	for coin := range gateway.Channel() {
-		h.update(coin)
+	for coins := range gateway.Channel() {
+		h.update(coins)
 	}
 }
 
@@ -122,38 +119,37 @@ func (h *Holder) ProvideLast(seconds int64) []collector.Coin {
 	return result
 }
 
-func (h *Holder) updateBaseTime() bool {
-	current := time.Now()
-	timeDiff := time.Duration(current.Unix() - h.lastBaseTime)
-	if timeDiff > (time.Hour*24)/time.Second {
-		y, m, d := current.Date()
-		newBase := time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
-		h.lastBaseTime = newBase.Unix()
-
-		return true
+func (h *Holder) update(coins []collector.Coin) {
+	for len(*(h.records)) >= h.capacity {
+		*(h.records) = (*(h.records))[1:]
 	}
-	return false
-}
 
-func (h *Holder) update(coin collector.Coin) {
-	// Update time
-	baseTimeChanged := h.updateBaseTime()
-	if baseTimeChanged {
-		h.lastCumulativeVolume = coin.Qty
-	}
-	if h.isFirst {
-		h.isFirst = false
-	} else {
-		for len(*(h.records)) >= h.capacity {
-			*(h.records) = (*(h.records))[1:]
+	// Skip data older than last time
+	// if same to last time, skip for last same time count
+	// else, append all
+
+	lastTradeCounter := 0
+	for _, coin := range coins {
+		if h.lastTradeTime > coin.Timestamp {
+			continue
 		}
-		newCoin := coin
-		if baseTimeChanged {
-			newCoin.Qty = coin.Qty
-		} else {
-			newCoin.Qty = coin.Qty - h.lastCumulativeVolume
+		if h.lastTradeTime == coin.Timestamp {
+			if h.lastTradeCount > lastTradeCounter {
+				lastTradeCounter++
+				continue
+			}
+			length := len(*(h.records))
+			last := (*(h.records))[length-1]
+			(&last).Price = coin.Price
+			(&last).Qty += coin.Qty
+
+			lastTradeCounter++
 		}
-		h.lastCumulativeVolume = coin.Qty
-		*(h.records) = append(*(h.records), newCoin)
+		if h.lastTradeTime < coin.Timestamp {
+			lastTradeCounter = 1
+			*(h.records) = append(*(h.records), coin)
+		}
+		h.lastTradeTime = coin.Timestamp
+		h.lastTradeCount = lastTradeCounter
 	}
 }

@@ -1,17 +1,18 @@
 package collector
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/helloworldpark/goticklecollector/api"
 	"github.com/helloworldpark/goticklecollector/utils"
 )
 
 // Collector is an interface a collector should do.
 // Collect() collects and wraps in a Coin slice.
-// Count() is a number how many types of Coin will be in Collect()
 type Collector interface {
 	Collect() []Coin
-	Count() int
-	Currencies() []string
+	Currency() string
 }
 
 // CoinoneCollector collects coin data from Coinone.
@@ -47,59 +48,83 @@ func init() {
 	}
 }
 
+// NewCollector is a constructor of Collector interface
+func NewCollector(v api.Vendor, currency string) Collector {
+	if v == api.Gopax {
+		return GopaxCollector{currency: currency}
+	}
+	if v == api.Coinone {
+		return CoinoneCollector{currency: currency}
+	}
+	panic(fmt.Sprintf("Not prepared for %s", v.Name))
+}
+
+// NewCollectors is a constructor of Collector interface
+func NewCollectors(v api.Vendor, currencies []string) []Collector {
+	if v == api.Gopax {
+		collectors := make([]Collector, len(currencies))
+		for i := 0; i < len(collectors); i++ {
+			collectors[i] = GopaxCollector{currency: currencies[i]}
+		}
+		return collectors
+	}
+	if v == api.Coinone {
+		collectors := make([]Collector, len(currencies))
+		for i := 0; i < len(collectors); i++ {
+			collectors[i] = CoinoneCollector{currency: currencies[i]}
+		}
+		return collectors
+	}
+	panic(fmt.Sprintf("Not prepared for %s", v.Name))
+}
+
 // Collect collects coin data from Coinone.
 // Returns all coin data collected by ticker.
 func (collector CoinoneCollector) Collect() []Coin {
-	status, contents, errs := api.Coinone.TickerAPI("all").Request()
-	if status != 200 {
-		return make([]Coin, 0)
-	}
-	if len(errs) > 0 {
+	status, contents, errs := api.Coinone.TradesAPI(collector.currency).Request()
+	if status != 200 || len(errs) > 0 {
+		log.Printf("Status: %d, Errs: %v", status, errs)
 		return make([]Coin, 0)
 	}
 
-	coins := JSONToCoin(api.Coinone, contents)
+	coins := JSONToCoinTrades(api.Coinone, contents)
+	for i := 0; i < len(coins); i++ {
+		coins[i].Currency = collector.currency
+		coins[i].Vendor = api.Coinone.Name
+	}
 
 	return coins
 }
 
-// Count returns how many types of Coin collector will collect
-// In case of CoinoneCollector, 11
-func (collector CoinoneCollector) Count() int {
-	return 11
-}
-
-// Currencies returns the currency the collector is now collecting
-func (collector CoinoneCollector) Currencies() []string {
-	return []string{"btc", "bch", "eth", "etc", "xrp", "qtum", "iota", "ltc", "btg", "omg", "eos"}
+// Currency returns the currency the collector is now collecting
+func (collector CoinoneCollector) Currency() string {
+	return collector.currency
 }
 
 // Collect collects coin data from Gopax.
 // Returns coin data collected by ticker, by specified currency of the collector.
 func (collector GopaxCollector) Collect() []Coin {
 	status, contents, errs := api.Gopax.TickerAPI(collector.currency).Request()
-	if status != 200 {
-		return make([]Coin, 0)
-	}
-	if len(errs) > 0 {
+	if status != 200 || len(errs) > 0 {
+		log.Printf("Status: %d, Errs: %v", status, errs)
 		return make([]Coin, 0)
 	}
 
-	coins := JSONToCoin(api.Gopax, contents)
+	coins := JSONToCoinTrades(api.Gopax, contents)
 	for i := 0; i < len(coins); i++ {
 		coins[i].Currency = collector.currency
+		coins[i].Vendor = api.Gopax.Name
+	}
+	// Reverse it, since Coinone is ascending
+	for i := len(coins)/2 - 1; i >= 0; i-- {
+		opp := len(coins) - 1 - i
+		coins[i], coins[opp] = coins[opp], coins[i]
 	}
 
 	return coins
 }
 
-// Count returns how many types of Coin collector will collect
-// In case of GopaxCollector, 1
-func (collector GopaxCollector) Count() int {
-	return 1
-}
-
-// Currencies returns the currency the collector is now collecting
-func (collector GopaxCollector) Currencies() []string {
-	return []string{collector.currency}
+// Currency returns the currency the collector is now collecting
+func (collector GopaxCollector) Currency() string {
+	return collector.currency
 }

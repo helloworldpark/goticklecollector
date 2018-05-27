@@ -1,11 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
-	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,36 +14,28 @@ import (
 )
 
 func main() {
-	fmt.Println("Main!")
+	// Parse flags
+	// credential := flag.String("credential", "", "Credential for DB access")
+	// flag.Parse()
 
-	// Setting up Coin Collectors...
-	coll := collector.CoinoneCollector{}
+	// Read credential
+
+	// Setup Coin Collectors
+	currencies := []string{"eos"}
+	collectors := collector.NewCollectors(api.Coinone, currencies)
 	holders := make([]holder.Holder, 0)
 
-	for _, currency := range coll.Currencies() {
-		h := holder.New(api.Coinone.Name, currency, 10)
+	for _, col := range collectors {
+		h := holder.New(api.Coinone.Name, col.Currency(), 10)
 		holders = append(holders, h)
 	}
-	sort.Slice(holders, func(i, j int) bool {
-		return strings.Compare(holders[i].Currency, holders[j].Currency) <= 0
-	})
 
-	coinoneGW := collector.GiveWork(coll, 3*time.Second)
-	dfBundle, dbBundle := collector.Gather(coinoneGW)
-
-	for i, bundle := range dfBundle {
+	for i, col := range collectors {
+		worker := collector.GiveWork(col, 20*time.Second)
 		go func(idx int, g collector.CoinGateway) {
 			holders[idx].StartUpdate(g)
-		}(i, bundle)
+		}(i, worker)
 	}
-
-	go func(bundle collector.CoinGateway) {
-		for coin := range bundle.Channel() {
-			_ = coin.Timestamp
-		}
-	}(dbBundle)
-
-	fmt.Println("Start running")
 
 	// Setup API
 	router := gin.Default()
