@@ -17,11 +17,11 @@ type coinBuffer []collector.Coin
 
 // DBCredential contains info needed to connect to DB
 type DBCredential struct {
-	instanceConnectionName string
-	databaseUser           string
-	password               string
-	dbName                 string
-	tableName              string
+	InstanceConnectionName string `json:"instanceConnectionName"`
+	DatabaseUser           string `json:"databaseUser"`
+	Password               string `json:"password"`
+	DBName                 string `json:"dbName"`
+	TableName              string `json:"tableName"`
 }
 
 // DBHolder provides an interface to writing to DB
@@ -43,8 +43,6 @@ func LoadCredential(filePath string) DBCredential {
 	if err != nil {
 		panic(err)
 	}
-
-	log.Print(raw)
 
 	var cred DBCredential
 	if err := json.Unmarshal(raw, &cred); err != nil {
@@ -78,8 +76,8 @@ func (h *DBHolder) Init() {
 	}
 	h.isInitialized = true
 
-	h.dbName = h.credential.dbName
-	h.tableName = h.credential.tableName
+	h.dbName = h.credential.DBName
+	h.tableName = h.credential.TableName
 
 	openingQ := openingQuery(h.credential)
 	log.Print(openingQ)
@@ -92,13 +90,13 @@ func (h *DBHolder) Init() {
 
 func openingQuery(credential DBCredential) string {
 	var buf bytes.Buffer
-	buf.WriteString(credential.databaseUser)
+	buf.WriteString(credential.DatabaseUser)
 	buf.WriteByte(':')
-	buf.WriteString(credential.password)
+	buf.WriteString(credential.Password)
 	buf.WriteByte('@')
 	buf.WriteString("127.0.0.1:3306")
 	buf.WriteByte('/')
-	buf.WriteString(credential.dbName)
+	buf.WriteString(credential.DBName)
 	return buf.String()
 }
 
