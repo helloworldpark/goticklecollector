@@ -45,13 +45,6 @@ func New(vendor, currency string, capacity int) Holder {
 	return h
 }
 
-// StartUpdate starts to update coin information
-func (h Holder) StartUpdate(gateway collector.CoinGateway) {
-	for coins := range gateway.Channel() {
-		h.update(coins)
-	}
-}
-
 // CanProvide checks if the provider can provide data of the query
 // Params:
 //    from: int64, UNIX timestamp, should be smaller than to
@@ -116,10 +109,27 @@ func (h *Holder) ProvideLast(seconds int64) []collector.Coin {
 		}
 		result = append(result, coin)
 	}
+	for i := len(result)/2 - 1; i >= 0; i-- {
+		opp := len(result) - 1 - i
+		result[i], result[opp] = result[opp], result[i]
+	}
 	return result
 }
 
-func (h *Holder) update(coins []collector.Coin) {
+// UpdatingPipe starts to update coin information
+func (h Holder) UpdatingPipe(gateway collector.CoinGateway) <-chan collector.Coin {
+	updateChannel := make(chan collector.Coin)
+	go func() {
+		defer close(updateChannel)
+
+		for coins := range gateway.Channel() {
+			h.update(coins, updateChannel)
+		}
+	}()
+	return updateChannel
+}
+
+func (h *Holder) update(coins []collector.Coin, output chan collector.Coin) {
 	for len(*(h.records)) >= h.capacity {
 		*(h.records) = (*(h.records))[1:]
 	}
@@ -151,5 +161,9 @@ func (h *Holder) update(coins []collector.Coin) {
 		}
 		h.lastTradeTime = coin.Timestamp
 		h.lastTradeCount = lastTradeCounter
+
+		length := len(*(h.records))
+		last := (*(h.records))[length-1]
+		output <- last
 	}
 }

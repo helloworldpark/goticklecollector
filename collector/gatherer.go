@@ -10,7 +10,14 @@ type CoinGateway struct {
 	gateway chan []Coin
 }
 
-// Channel is a property to <-chan Coin
+// NewGateway returns a new CoinGateway
+func NewGateway() CoinGateway {
+	gateway := CoinGateway{}
+	gateway.gateway = make(chan []Coin)
+	return gateway
+}
+
+// Channel is a property to <-chan []Coin
 func (cg CoinGateway) Channel() <-chan []Coin {
 	return cg.gateway
 }
