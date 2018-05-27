@@ -44,10 +44,13 @@ func LoadCredential(filePath string) DBCredential {
 		panic(err)
 	}
 
+	log.Print(raw)
+
 	var cred DBCredential
 	if err := json.Unmarshal(raw, &cred); err != nil {
 		panic(err)
 	}
+	log.Print(cred)
 	return cred
 }
 
