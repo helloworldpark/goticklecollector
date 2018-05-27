@@ -78,7 +78,9 @@ func (h *DBHolder) Init() {
 	h.dbName = h.credential.dbName
 	h.tableName = h.credential.tableName
 
-	db, err := sql.Open("mysql", openingQuery(h.credential))
+	openingQ := openingQuery(h.credential)
+	log.Print(openingQ)
+	db, err := sql.Open("mysql", openingQ)
 	if err != nil {
 		panic(err)
 	}
