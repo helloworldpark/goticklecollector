@@ -9,6 +9,7 @@ import (
 	"log"
 	"sync"
 
+	_ "github.com/go-sql-driver/mysql" // SQL Connection
 	"github.com/helloworldpark/goticklecollector/collector"
 )
 
