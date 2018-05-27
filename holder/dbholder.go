@@ -48,7 +48,6 @@ func LoadCredential(filePath string) DBCredential {
 	if err := json.Unmarshal(raw, &cred); err != nil {
 		panic(err)
 	}
-	log.Print(cred)
 	return cred
 }
 
@@ -80,7 +79,6 @@ func (h *DBHolder) Init() {
 	h.tableName = h.credential.TableName
 
 	openingQ := openingQuery(h.credential)
-	log.Print(openingQ)
 	db, err := sql.Open("mysql", openingQ)
 	if err != nil {
 		panic(err)
@@ -134,7 +132,7 @@ func (h DBHolder) flush() {
 		return
 	}
 	// vendor, currency, price, qty, timestamp
-	qstring := fmt.Sprintf("INSERT INTO %s VALUES (?, ?, ?, ?, ?)", h.tableName)
+	qstring := fmt.Sprintf("INSERT INTO %s (vendor, currency, price, qty, timestamp) VALUES (?, ?, ?, ?, ?)", h.tableName)
 
 	log.Printf("Flush? %s", qstring)
 	buffer := h.buffers[h.bufferIndex]
