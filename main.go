@@ -32,17 +32,18 @@ func main() {
 	dbChannels := generateDBChannels()
 
 	// Setup Coin Collectors
-	currencies := []string{"eos", "btc"}
+	currencyCoinone := []string{"btc", "bch", "eth", "etc", "xrp", "qtum", "iota", "ltc", "btg", "omg", "eos"}
+	currencyGopax := []string{"eth", "btc", "bch", "eos", "omg", "qtum", "xrp", "ltc"}
 	holderMap := make(map[string][]holder.Holder)
 	holderMap[api.Coinone.Name] = generateHolders(
 		api.Coinone,
-		currencies,
+		currencyCoinone,
 		20,
 		10,
 		&dbChannels)
 	holderMap[api.Gopax.Name] = generateHolders(
 		api.Gopax,
-		currencies,
+		currencyGopax,
 		3,
 		10,
 		&dbChannels)

@@ -67,7 +67,11 @@ func Info(format string, v ...interface{}) {
 	if loggerInfo == nil {
 		log.Printf("[INFO] "+format, v)
 	} else {
-		loggerInfo.Printf("[INFO] "+format, v)
+		if len(v) > 0 {
+			loggerInfo.Printf("[INFO] "+format, v)
+		} else {
+			loggerInfo.Printf("[INFO] " + format)
+		}
 	}
 }
 
@@ -76,7 +80,11 @@ func Warn(format string, v ...interface{}) {
 	if loggerWarn == nil {
 		log.Printf("[WARN] "+format, v)
 	} else {
-		loggerWarn.Printf("[WARN] "+format, v)
+		if len(v) > 0 {
+			loggerWarn.Printf("[WARN] "+format, v)
+		} else {
+			loggerWarn.Printf("[WARN] " + format)
+		}
 	}
 }
 
@@ -85,7 +93,11 @@ func Error(format string, v ...interface{}) {
 	if loggerError == nil {
 		log.Printf("[ERROR] "+format, v)
 	} else {
-		loggerError.Printf("[ERROR] "+format, v)
+		if len(v) > 0 {
+			loggerError.Printf("[ERROR] "+format, v)
+		} else {
+			loggerError.Printf("[ERROR] " + format)
+		}
 	}
 }
 
@@ -94,6 +106,10 @@ func Panic(format string, v ...interface{}) {
 	if loggerPanic == nil {
 		log.Panicf("[PANIC] "+format, v)
 	} else {
-		loggerPanic.Panicf("[PANIC] "+format, v)
+		if len(v) > 0 {
+			loggerPanic.Panicf("[PANIC] "+format, v)
+		} else {
+			loggerPanic.Panicf("[PANIC] " + format)
+		}
 	}
 }
