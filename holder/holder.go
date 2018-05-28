@@ -158,12 +158,14 @@ func (h *Holder) update(coins []collector.Coin, output chan collector.Coin) {
 		if h.lastTradeTime < coin.Timestamp {
 			lastTradeCounter = 1
 			*(h.records) = append(*(h.records), coin)
+			// Add not the latest but 1 index earlier to DB
+			length := len(*(h.records))
+			if length >= 2 {
+				last := (*(h.records))[length-2]
+				output <- last
+			}
 		}
 		h.lastTradeTime = coin.Timestamp
 		h.lastTradeCount = lastTradeCounter
-
-		length := len(*(h.records))
-		last := (*(h.records))[length-1]
-		output <- last
 	}
 }

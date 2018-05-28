@@ -104,7 +104,7 @@ func (collector CoinoneCollector) Currency() string {
 // Collect collects coin data from Gopax.
 // Returns coin data collected by ticker, by specified currency of the collector.
 func (collector GopaxCollector) Collect() []Coin {
-	status, contents, errs := api.Gopax.TickerAPI(collector.currency).Request()
+	status, contents, errs := api.Gopax.TradesAPI(collector.currency).Request()
 	if status != 200 || len(errs) > 0 {
 		log.Printf("Status: %d, Errs: %v", status, errs)
 		return make([]Coin, 0)

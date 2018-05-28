@@ -37,23 +37,11 @@ type DBHolder struct {
 	tableName string
 }
 
-// LoadCredential load DB credential from json file
-func LoadCredential(filePath string) DBCredential {
-	raw, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		panic(err)
-	}
-
-	var cred DBCredential
-	if err := json.Unmarshal(raw, &cred); err != nil {
-		panic(err)
-	}
-	return cred
-}
-
 // NewDBHolder generates DBHolder from credential.
 // Call this only once.
-func NewDBHolder(credential DBCredential, capacity int) DBHolder {
+func NewDBHolder(credPath string, capacity int) DBHolder {
+	credential := loadCredential(credPath)
+
 	buffers := make([]*coinBuffer, 2)
 	b1 := make(coinBuffer, 0, capacity)
 	b2 := make(coinBuffer, 0, capacity)
@@ -66,6 +54,20 @@ func NewDBHolder(credential DBCredential, capacity int) DBHolder {
 		capacity:    capacity,
 		credential:  credential}
 	return dbHolder
+}
+
+// loadCredential load DB credential from json file
+func loadCredential(filePath string) DBCredential {
+	raw, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		panic(err)
+	}
+
+	var cred DBCredential
+	if err := json.Unmarshal(raw, &cred); err != nil {
+		panic(err)
+	}
+	return cred
 }
 
 // Init initializes DB
@@ -134,7 +136,6 @@ func (h DBHolder) flush() {
 	// vendor, currency, price, qty, timestamp
 	qstring := fmt.Sprintf("INSERT INTO %s (vendor, currency, price, qty, timestamp) VALUES (?, ?, ?, ?, ?)", h.tableName)
 
-	log.Printf("Flush? %s", qstring)
 	buffer := h.buffers[h.bufferIndex]
 	for _, coin := range *buffer {
 		_, err := tx.Exec(qstring, coin.Vendor, coin.Currency, coin.Price, coin.Qty, coin.Timestamp)

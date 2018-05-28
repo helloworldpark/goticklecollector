@@ -30,7 +30,7 @@ type tradeModelCoinone struct {
 
 type tradesModelGopax struct {
 	Price     int     `json:"price"`
-	Qty       float64 `json:"qty"`
+	Qty       float64 `json:"amount"`
 	Timestamp int64   `json:"date"`
 }
 
