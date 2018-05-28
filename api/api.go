@@ -1,9 +1,9 @@
 package api
 
 import (
-	"fmt"
 	"strings"
 
+	"github.com/helloworldpark/goticklecollector/logger"
 	"github.com/parnurzeal/gorequest"
 )
 
@@ -60,6 +60,7 @@ func init() {
 	requesterMap[Gopax.Name] = gorequest.New()
 }
 
+// TradesAPI calls past trade records
 func (v Vendor) TradesAPI(currency string) OutboundAPI {
 	if v == Coinone {
 		rest := RestResource{name: "trades", value: ""}
@@ -80,7 +81,9 @@ func (v Vendor) TradesAPI(currency string) OutboundAPI {
 		outbound := OutboundAPI{vendor: v, restList: restList, params: query}
 		return outbound
 	}
-	panic(fmt.Sprintf("Not prepared for %s", v.Name))
+	logger.Panic("[API] Not prepared for vendor %s", v.Name)
+	var empty OutboundAPI
+	return empty
 }
 
 // TickerAPI constructs an OutboundAPI struct for calling /ticker for each vendor.
@@ -103,7 +106,9 @@ func (v Vendor) TickerAPI(currency string) OutboundAPI {
 		outbound := OutboundAPI{vendor: v, restList: restList, params: query}
 		return outbound
 	}
-	panic(fmt.Sprintf("Not prepared for %s", v.Name))
+	logger.Panic("[API] Not prepared for vendor %s", v.Name)
+	var empty OutboundAPI
+	return empty
 }
 
 // Request makes a request to the vendor using the data from api.
@@ -111,7 +116,8 @@ func (v Vendor) TickerAPI(currency string) OutboundAPI {
 func (api OutboundAPI) Request() (int, string, []error) {
 	requester := requesterMap[api.vendor.Name]
 	if requester == nil {
-		panic(fmt.Sprintf("Not prepared for requesting to %s", api.vendor.Name))
+		logger.Panic("[API] Not prepared for requesting to %s", api.vendor.Name)
+		return 0, "", nil
 	}
 
 	targetURL := api.buildURL()

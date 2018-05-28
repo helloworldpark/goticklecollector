@@ -3,6 +3,8 @@ package collector
 import (
 	"encoding/json"
 
+	"github.com/helloworldpark/goticklecollector/logger"
+
 	"github.com/helloworldpark/goticklecollector/api"
 )
 
@@ -48,7 +50,8 @@ func JSONToCoinTrades(vendor api.Vendor, jsonString string) []Coin {
 		convertables, err = jsonToGopaxTrades(jsonString)
 	}
 	if err != nil {
-		panic(err)
+		logger.Error("[Collector] %v", err)
+		return make([]Coin, 0)
 	}
 	coins := make([]Coin, 0, len(convertables))
 	for _, convertable := range convertables {

@@ -1,10 +1,8 @@
 package collector
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/helloworldpark/goticklecollector/api"
+	"github.com/helloworldpark/goticklecollector/logger"
 	"github.com/helloworldpark/goticklecollector/utils"
 )
 
@@ -56,7 +54,8 @@ func NewCollector(v api.Vendor, currency string) Collector {
 	if v == api.Coinone {
 		return CoinoneCollector{currency: currency}
 	}
-	panic(fmt.Sprintf("Not prepared for %s", v.Name))
+	logger.Panic("[Collector] Not prepared for vendor %s", v.Name)
+	return nil
 }
 
 // NewCollectors is a constructor of Collector interface
@@ -75,7 +74,8 @@ func NewCollectors(v api.Vendor, currencies []string) []Collector {
 		}
 		return collectors
 	}
-	panic(fmt.Sprintf("Not prepared for %s", v.Name))
+	logger.Panic("[Collector] Not prepared for vendor %s", v.Name)
+	return nil
 }
 
 // Collect collects coin data from Coinone.
@@ -83,7 +83,7 @@ func NewCollectors(v api.Vendor, currencies []string) []Collector {
 func (collector CoinoneCollector) Collect() []Coin {
 	status, contents, errs := api.Coinone.TradesAPI(collector.currency).Request()
 	if status != 200 || len(errs) > 0 {
-		log.Printf("Status: %d, Errs: %v", status, errs)
+		logger.Error("[Collector] Status Code %d, Errors: %v", status, errs)
 		return make([]Coin, 0)
 	}
 
@@ -106,7 +106,7 @@ func (collector CoinoneCollector) Currency() string {
 func (collector GopaxCollector) Collect() []Coin {
 	status, contents, errs := api.Gopax.TradesAPI(collector.currency).Request()
 	if status != 200 || len(errs) > 0 {
-		log.Printf("Status: %d, Errs: %v", status, errs)
+		logger.Error("[Collector] Status Code %d, Errors: %v", status, errs)
 		return make([]Coin, 0)
 	}
 

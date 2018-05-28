@@ -9,18 +9,20 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/helloworldpark/goticklecollector/api"
+	"github.com/helloworldpark/goticklecollector/logger"
 
 	"github.com/helloworldpark/goticklecollector/collector"
 	"github.com/helloworldpark/goticklecollector/holder"
 )
 
 func main() {
+	defer logger.Close()
 	// Parse flags
 	credPath := flag.String("credential", "", "Credential for DB access")
 	flag.Parse()
 
 	if credPath == nil || *credPath == "" {
-		panic("No -credential provided")
+		logger.Panic("No -credential provided")
 	}
 
 	// DB Holder
@@ -50,6 +52,9 @@ func main() {
 
 	// Setup API
 	router := gin.Default()
+	if logger.IsLoggerGCE() {
+		router.Use(ginLoggerWithCustomLogger())
+	}
 	router.GET("/coins/last", func(c *gin.Context) {
 		v := c.Query("vendor")
 		cur := c.Query("currency")
@@ -121,4 +126,53 @@ func generateHolders(vendor api.Vendor, currencyList []string, period time.Durat
 		*dbChannels = append(*dbChannels, dbChannel)
 	}
 	return holders
+}
+
+func ginLoggerWithCustomLogger(notlogged ...string) gin.HandlerFunc {
+	var skip map[string]struct{}
+
+	if length := len(notlogged); length > 0 {
+		skip = make(map[string]struct{}, length)
+
+		for _, path := range notlogged {
+			skip[path] = struct{}{}
+		}
+	}
+
+	handler := func(c *gin.Context) {
+		// Start timer
+		start := time.Now()
+		path := c.Request.URL.Path
+		raw := c.Request.URL.RawQuery
+
+		// Process request
+		c.Next()
+
+		// Log only when path is not being skipped
+		if _, ok := skip[path]; !ok {
+			// Stop timer
+			end := time.Now()
+			latency := end.Sub(start)
+
+			clientIP := c.ClientIP()
+			method := c.Request.Method
+			statusCode := c.Writer.Status()
+			var statusColor, methodColor, resetColor string
+			comment := c.Errors.ByType(gin.ErrorTypePrivate).String()
+
+			if raw != "" {
+				path = path + "?" + raw
+			}
+
+			logger.Info("[GIN] %v |%s %3d %s| %13v | %15s |%s %-7s %s %s\n%s",
+				end.Format("2006/01/02 - 15:04:05"),
+				statusColor, statusCode, resetColor,
+				latency,
+				clientIP,
+				methodColor, method, resetColor,
+				path,
+				comment)
+		}
+	}
+	return handler
 }

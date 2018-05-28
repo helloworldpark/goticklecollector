@@ -1,7 +1,7 @@
 package holder
 
 import (
-	"log"
+	"github.com/helloworldpark/goticklecollector/logger"
 
 	"github.com/helloworldpark/goticklecollector/collector"
 )
@@ -96,7 +96,7 @@ func (h Holder) Provide(from, to int64) []collector.Coin {
 //    seconds: int64, UNIX timestamp, in seconds.
 func (h *Holder) ProvideLast(seconds int64) []collector.Coin {
 	records := h.records
-	log.Printf("[%s] Provide: %d data", h.Currency, len(*records))
+	logger.Info("[%s] Provide %d data", h.Currency, len(*records))
 	if len(*records) == 0 {
 		return *records
 	}

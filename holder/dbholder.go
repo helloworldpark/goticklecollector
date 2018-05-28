@@ -6,8 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"sync"
+
+	"github.com/helloworldpark/goticklecollector/logger"
 
 	_ "github.com/go-sql-driver/mysql" // SQL Connection
 	"github.com/helloworldpark/goticklecollector/collector"
@@ -60,12 +61,12 @@ func NewDBHolder(credPath string, capacity int) DBHolder {
 func loadCredential(filePath string) DBCredential {
 	raw, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		panic(err)
+		logger.Panic("%v", err)
 	}
 
 	var cred DBCredential
 	if err := json.Unmarshal(raw, &cred); err != nil {
-		panic(err)
+		logger.Panic("%v", err)
 	}
 	return cred
 }
@@ -83,9 +84,9 @@ func (h *DBHolder) Init() {
 	openingQ := openingQuery(h.credential)
 	db, err := sql.Open("mysql", openingQ)
 	if err != nil {
-		panic(err)
+		logger.Panic("%v", err)
 	}
-	log.Println("[DBHolder] DB Connection Finished")
+	logger.Info("[DB] Connected")
 	h.db = db
 }
 
@@ -115,6 +116,7 @@ func (h DBHolder) ConnectDBChannel(chans []<-chan collector.Coin) {
 				h.flush()
 				// Switch active buffer
 				h.switchBuffer()
+				logger.Info("[DB] Flushed")
 			}
 		}
 	}()
@@ -130,7 +132,7 @@ func (h *DBHolder) switchBuffer() {
 func (h DBHolder) flush() {
 	tx, err := h.db.Begin()
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("[DB] %v", err)
 		return
 	}
 	// vendor, currency, price, qty, timestamp
@@ -140,7 +142,7 @@ func (h DBHolder) flush() {
 	for _, coin := range *buffer {
 		_, err := tx.Exec(qstring, coin.Vendor, coin.Currency, coin.Price, coin.Qty, coin.Timestamp)
 		if err != nil {
-			log.Fatal(err)
+			logger.Error("[DB] %v", err)
 			tx.Rollback()
 			return
 		}

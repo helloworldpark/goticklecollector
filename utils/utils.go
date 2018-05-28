@@ -3,6 +3,8 @@ package utils
 import (
 	"strconv"
 	"time"
+
+	"github.com/helloworldpark/goticklecollector/logger"
 )
 
 // StringSet is a set(data structure) for string
@@ -104,7 +106,8 @@ func ExtractFloat64(obj map[string]interface{}, key string) (float64, bool) {
 // Sequence generates a sequence of equal interval
 func Sequence(start int, includedEnd int, interval int) []int {
 	if interval <= 0 {
-		panic("Cannot generate sequence with interval smaller or equal to zero")
+		logger.Error("Cannot generate sequence with interval smaller or equal to zero")
+		return make([]int, 0)
 	}
 	n := 1 + ((includedEnd - start) / interval)
 	seq := make([]int, n)
