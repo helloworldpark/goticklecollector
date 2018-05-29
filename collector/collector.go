@@ -83,7 +83,7 @@ func NewCollectors(v api.Vendor, currencies []string) []Collector {
 func (collector CoinoneCollector) Collect() []Coin {
 	status, contents, errs := api.Coinone.TradesAPI(collector.currency).Request()
 	if status != 200 || len(errs) > 0 {
-		logger.Error("[Collector] Status Code %d, Errors: %v", status, errs)
+		logger.Error("[Collector][%s] Status Code %d, Errors: %v", api.Coinone.Name, status, errs)
 		return make([]Coin, 0)
 	}
 
@@ -106,7 +106,7 @@ func (collector CoinoneCollector) Currency() string {
 func (collector GopaxCollector) Collect() []Coin {
 	status, contents, errs := api.Gopax.TradesAPI(collector.currency).Request()
 	if status != 200 || len(errs) > 0 {
-		logger.Error("[Collector] Status Code %d, Errors: %v", status, errs)
+		logger.Error("[Collector][%s] Status Code %d, Errors: %v", api.Gopax.Name, status, errs)
 		return make([]Coin, 0)
 	}
 
