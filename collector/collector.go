@@ -34,13 +34,13 @@ var (
 
 func init() {
 	CoinoneCurrencies = make(utils.StringSet)
-	coinoneList := []string{"btc", "bch", "eth", "etc", "xrp", "qtum", "iota", "ltc", "btg", "omg", "eos"}
+	coinoneList := []string{"btc", "bch", "eth", "etc", "xrp", "qtum", "iota", "ltc", "btg", "omg", "eos", "zil", "knc", "zrx"}
 	for _, e := range coinoneList {
 		CoinoneCurrencies.Add(e)
 	}
 
 	GopaxCurrencies = make(utils.StringSet)
-	gopaxList := []string{"btc", "bch", "eth", "etc", "xrp", "qtum", "iota", "ltc", "btg", "omg", "eos"}
+	gopaxList := []string{"btc", "bch", "eth", "etc", "xrp", "qtum", "iota", "ltc", "btg", "omg", "eos", "zil", "knc", "zrx"}
 	for _, e := range gopaxList {
 		GopaxCurrencies.Add(e)
 	}
