@@ -26,7 +26,7 @@ func main() {
 	}
 
 	// DB Holder
-	dbHolder := holder.NewDBHolder(*credPath, 20)
+	dbHolder := holder.NewDBHolder(*credPath, 1)
 	dbHolder.Init()
 
 	dbChannels := generateDBChannels()
