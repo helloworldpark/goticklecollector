@@ -13,7 +13,7 @@ type Coin struct {
 	Vendor    string  `json:"vendor"`
 	Currency  string  `json:"currency"`
 	Timestamp int64   `json:"timestamp"`
-	Price     int     `json:"price"`
+	Price     float64 `json:"price"`
 	Qty       float64 `json:"qty"`
 }
 
@@ -25,13 +25,13 @@ type tradesModelCoinone struct {
 }
 
 type tradeModelCoinone struct {
-	Price     int     `json:"price,string"`
+	Price     float64 `json:"price,string"`
 	Qty       float64 `json:"qty,string"`
 	Timestamp int64   `json:"timestamp,string"`
 }
 
 type tradesModelGopax struct {
-	Price     int     `json:"price"`
+	Price     float64 `json:"price"`
 	Qty       float64 `json:"amount"`
 	Timestamp int64   `json:"date"`
 }
