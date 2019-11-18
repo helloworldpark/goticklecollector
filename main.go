@@ -104,6 +104,7 @@ func main() {
 		}
 		c.JSON(http.StatusOK, coins)
 	})
+	logger.Info("[GoTickleCollector][Main] GoTickleCollector Started")
 	router.Run(":50001")
 }
 
